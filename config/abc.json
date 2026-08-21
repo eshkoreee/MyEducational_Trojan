@@ -1,7 +1,7 @@
 [
     {"module": "dirlister"},
     {"module": "environment"},
-    {"module": "screenshotter.py"},
-    {"module": "mykeylogger.py"},
-    {"module": "sandbox_detect.py"}
+    {"module": "screenshotter"},
+    {"module": "mykeylogger"},
+    {"module": "sandbox_detect"}
 ]
