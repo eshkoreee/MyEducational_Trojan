@@ -89,6 +89,7 @@ class Detector:
         return detection_complete
                 
 def run():
+    print('[*] in detect module')
     d = Detector()
     return d.detect()
 
